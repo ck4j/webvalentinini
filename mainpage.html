@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tặng em 💗</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden; 
+            cursor: none; 
+            background-color: #ffe5ec;
+        }
+
+        @media (max-width: 768px) {
+            html, body { cursor: auto; } 
+            #custom-cursor { display: none !important; } 
+            h1 { font-size: 1.8rem !important; margin-bottom: 10px !important; }
+            .gif-sticker { width: 160px !important; }
+            .polaroid-wrapper { padding: 10px 10px 30px 10px !important; margin-bottom: 20px !important; }
+            .question-card { padding: 30px 20px !important; width: 85% !important; }
+            .cat-img { width: 120px !important; height: 120px !important; }
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(-45deg, #ffe5ec, #ffc2d1, #fff0f3, #e2e2df);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            z-index: 1;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .blob-cont {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: floatBlob 10s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+        .blob-1 { width: 400px; height: 400px; background: #ff8fa3; top: -100px; left: -100px; }
+        .blob-2 { width: 300px; height: 300px; background: #ffb3c1; bottom: -50px; right: -50px; animation-duration: 15s; }
+        .blob-3 { width: 200px; height: 200px; background: #fff; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-duration: 12s; }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        #floating-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        @keyframes floatUp { 
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; } 
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } 
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 90;
+            opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .main-container {
+            height: 100vh;
+            height: 100dvh; 
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            &::-webkit-scrollbar { display: none; }
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 100;
+        }
+
+        .section {
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            scroll-snap-align: start; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative; 
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 3rem;
+            color: #d44d5c;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            line-height: 1.2;
+        }
+        .section.visible h1 { opacity: 1; transform: translateY(0); }
+
+        .polaroid-wrapper {
+            background: white;
+            padding: 15px 15px 40px 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: rotate(-3deg);
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity: 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .polaroid-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -15px; left: 50%;
+            transform: translateX(-50%);
+            width: 100px; height: 30px;
+            background-color: rgba(255,255,255,0.4);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+        }
+        .section.visible .polaroid-wrapper { opacity: 1; transform: rotate(-3deg) scale(1); }
+
+        .gif-sticker {
+            width: 220px; height: auto; display: block; filter: contrast(1.1);
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease;
+        }
+        .section.visible .question-card { opacity: 1; transform: scale(1); }
+
+        .cat-img {
+            width: 160px; height: 160px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 6px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: none; 
+            font-family: 'Nunito', sans-serif;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+        .yes-btn {
+            background: linear-gradient(135deg, #ff4d6d 0%, #ff8fa3 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(255, 77, 109, 0.3);
+            z-index: 100; 
+        }
+        .yes-btn:hover { transform: scale(1.05); }
+
+        .no-btn {
+            background: rgba(255, 255, 255, 0.8);
+            color: #590d22;
+            border: 1px solid white;
+            position: relative; 
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+            transition: left 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                        top 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            font-family: 'Playfair Display', serif;
+            color: #d44d5c;
+            opacity: 0;
+            cursor: none;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+            transition: opacity 1s ease 1s;
+            animation: floatText 3s ease-in-out infinite;
+        }
+        .section.visible .scroll-indicator { opacity: 0.7; }
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 30px; height: 30px;
+            background-image: url("https://i.postimg.cc/Kcrw4CNB/mininini.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none; 
+            z-index: 99999; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gradient-bg"></div>
+
+    <div class="blob-cont">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div id="floating-container"></div>
+    <div class="noise-overlay"></div>
+    <div id="custom-cursor"></div>
+
+    <div class="main-container" id="mainContainer">
+
+        <div class="section" id="sec1">
+            <div class="polaroid-wrapper">
+                <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmh0Z3YwdmtwcDhxd3licmRtcTJwdmtibnBvbHVoejdybGRkazY1ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FJ0yDY9uAHzxLeKfIn/giphy.gif" alt="Surprised Cat" class="gif-sticker">
+            </div>
+            <h1>Haluuuuu bạn nhỏ Nini cuti xinh gái! <br> Nini biết hôm nay là ngày gì hemmmmm 🗓️</h1>
+            <div onclick="scrollToSection('sec2')" class="scroll-indicator">LƯỚT XUỐNG NÈ</div>
+        </div>
+
+        <div class="section" id="sec2">
+            <div class="polaroid-wrapper" style="transform: rotate(2deg);">
+                <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZHBmZGw4YTA2MWg3MGlpMmtqZ2J1OTI1bXgxN2VqendhbG1tNmFoaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DEbcjhoX1zBTiXmr3M/giphy.gif" alt="Shy Cat" class="gif-sticker">
+            </div>
+            <h1>Hôm nay là ngày Valentine đoáaa! <br> Tiện đây bà cho tui hỏi bà một câu nhaaaaa 👉👈</h1>
+            <div onclick="scrollToSection('sec3')" class="scroll-indicator">LƯỚT XUỐNG THÊM TÍ NÈE</div>
+        </div>
+
+        <div class="section" id="sec3">
+            <div class="question-card" id="card3">
+                <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExczl3ZW84ZXE2M3p0ZHJ0aW81d3YzN2txcTRwb2p1NzByN2JpcjJjMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wvYNSqBAMDVx8CEYkt/giphy.gif" alt="Cute Cat" class="cat-img">
+                
+                <h1>Nini làm Valentine của Bin nhóoooo 🌹</h1>
+        
+                <div class="btn-group">
+                    <button class="yes-btn" onclick="location.href='redirectpage.html'">YESSSSS 🫰</button>
+                    <button class="no-btn" id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">Ừ</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.3 }); 
+        document.querySelectorAll('.section').forEach(el => observer.observe(el));
+
+        const cursor = document.getElementById('custom-cursor');
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        if (!isTouchDevice) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX - 15 + 'px';
+                cursor.style.top = e.clientY - 15 + 'px';
+            });
+        } else {
+            cursor.style.display = 'none';
+        }
+
+        let hasMovedOnce = false;
+
+        function moveButton() {
+            const btn = document.getElementById('noBtn');
+            const section = document.getElementById('sec3');
+            
+            if (!hasMovedOnce) {
+                const rect = btn.getBoundingClientRect();
+                const sectionRect = section.getBoundingClientRect();
+                
+                btn.style.width = rect.width + 'px';
+                btn.style.height = rect.height + 'px';
+                
+                section.appendChild(btn);
+                btn.style.position = 'absolute';
+                btn.style.left = (rect.left) + 'px';
+                btn.style.top = (rect.top - sectionRect.top) + 'px';
+                
+                hasMovedOnce = true;
+                requestAnimationFrame(relocate);
+            } else {
+                relocate();
+            }
+        }
+
+        function relocate() {
+            const btn = document.getElementById('noBtn');
+            const section = document.getElementById('sec3');
+            
+            const padding = 20; 
+            const maxX = section.clientWidth - btn.offsetWidth - padding;
+            const maxY = section.clientHeight - btn.offsetHeight - padding;
+
+            const newX = Math.random() * maxX; 
+            const newY = Math.random() * maxY;
+            
+            const safeX = Math.max(padding, newX);
+            const safeY = Math.max(padding, newY);
+
+            const rot = Math.floor(Math.random() * 40) - 20;
+
+            btn.style.left = safeX + 'px';
+            btn.style.top = safeY + 'px';
+            btn.style.transform = `rotate(${rot}deg)`;
+        }
+
+        function createFloatingElement() {
+            const el = document.createElement('div');
+            const isTulip = Math.random() > 0.5;
+            el.innerHTML = isTulip ? '🌷' : '❤️';
+            
+            el.style.position = 'absolute'; 
+            el.style.left = Math.random() * 90 + 'vw'; 
+            el.style.top = '110vh'; 
+            el.style.fontSize = (Math.random() * 20 + 20) + 'px'; 
+            
+            const duration = Math.random() * 5 + 8; 
+            el.style.animation = `floatUp ${duration}s linear forwards`;
+            
+            document.getElementById('floating-container').appendChild(el);
+            setTimeout(() => { el.remove() }, duration * 1000);
+        }
+
+        setInterval(createFloatingElement, 800); 
+    </script>
+</body>
+</html>

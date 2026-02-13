@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yayyy! 💗</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden; 
+            cursor: none; 
+            background-color: #ffe5ec;
+        }
+
+        @media (max-width: 768px) {
+            html, body { cursor: auto; }
+            #custom-cursor { display: none !important; }
+            .container { padding: 20px 10px !important; }
+            h1 { font-size: 2rem !important; }
+            p { font-size: 1rem !important; }
+            
+            .gallery-container {
+                grid-template-columns: 1fr !important;
+                gap: 30px !important;
+                padding: 10px !important;
+            }
+            .polaroid { margin-bottom: 20px; }
+            
+            .glass-card { padding: 25px 15px !important; width: 90% !important; margin: 40px auto !important; }
+            .letter { font-size: 1rem !important; margin-bottom: 50px !important; }
+            input[type=range]::-webkit-slider-thumb { width: 30px !important; height: 30px !important; } 
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(-45deg, #ffe5ec, #ffc2d1, #fff0f3, #e2e2df);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            z-index: 1; 
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .blob-cont {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: floatBlob 10s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+        .blob-1 { width: 400px; height: 400px; background: #ff8fa3; top: -100px; left: -100px; }
+        .blob-2 { width: 300px; height: 300px; background: #ffb3c1; bottom: -50px; right: -50px; animation-duration: 15s; }
+        .blob-3 { width: 200px; height: 200px; background: #fff; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-duration: 12s; }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        #floating-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 3; 
+        }
+        @keyframes floatUp { 
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; } 
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } 
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 90;
+            opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 100;
+        }
+
+        .mascot-img {
+            width: 260px;
+            height: auto; 
+            display: block; 
+            margin: 0 auto 20px auto; 
+            filter: drop-shadow(0 10px 15px rgba(212, 77, 92, 0.2)); 
+            animation: mascotFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes mascotFloat {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #d44d5c;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
+            opacity: 0; 
+            animation: fadeUp 1s ease-out forwards;
+        }
+        p { 
+            font-size: 1.2rem; color: #590d22; 
+            opacity: 0; animation: fadeUp 1s ease-out 0.3s forwards;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 40px; 
+            margin-top: 60px;
+            padding: 20px;
+            perspective: 1000px; 
+        }
+
+        .polaroid {
+            background: white;
+            padding: 15px 15px 55px 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: none;
+            opacity: 0; 
+            border-radius: 4px;
+            animation: floatIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(60px) scale(0.9); }
+            to { opacity: 1; }
+        }
+
+        .polaroid:nth-child(1) { animation-delay: 0.4s; transform: rotate(-3deg); }
+        .polaroid:nth-child(2) { animation-delay: 0.6s; transform: rotate(2deg) translateY(-15px); z-index: 2; }
+        .polaroid:nth-child(3) { animation-delay: 0.8s; transform: rotate(-4deg); }
+        .polaroid:nth-child(4) { animation-delay: 1.0s; transform: rotate(3deg); }
+        .polaroid:nth-child(5) { animation-delay: 1.2s; transform: rotate(-2deg) translateY(-15px); z-index: 2;}
+        .polaroid:nth-child(6) { animation-delay: 1.4s; transform: rotate(4deg); }
+
+        .polaroid:hover {
+            transform: scale(1.1) rotate(0deg) translateY(-10px) !important;
+            z-index: 100;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .polaroid::before {
+            content: '';
+            position: absolute;
+            top: -15px; left: 50%;
+            transform: translateX(-50%);
+            width: 90px; height: 25px;
+            background-color: rgba(255,255,255,0.4);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 280px; 
+            object-fit: cover;
+            border-radius: 2px;
+            filter: contrast(1.02) brightness(1.02);
+            background-color: #f0f0f0;
+        }
+
+        .note {
+            position: absolute;
+            bottom: 15px; left: 0; width: 100%;
+            text-align: center;
+            font-family: 'Nunito', sans-serif;
+            color: #444;
+            font-size: 1rem;
+            font-weight: 400; 
+            letter-spacing: 0.5px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            margin: 80px auto;
+            max-width: 600px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            margin: 20px 0;
+            background: transparent; 
+            cursor: none;
+            border-radius: 25px; 
+            border: 2px solid #ffccd5;
+            height: 12px;
+        }
+        input[type=range]:focus { outline: none; }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 12px;
+            cursor: none;
+            background: transparent; 
+            border-radius: 25px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 25px; 
+            width: 25px;
+            border-radius: 50%;
+            background: #ffc2d1; 
+            cursor: none;
+            -webkit-appearance: none;
+            margin-top: -8px; 
+            box-shadow: 0 4px 10px rgba(255, 194, 209, 0.5);
+            border: 3px solid white;
+            transition: all 0.3s ease;
+        }
+        
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type=range].locked::-webkit-slider-thumb {
+            background: #ff4d6d !important; 
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.6);
+        }
+        
+        input[type=range].locked::-moz-range-thumb {
+            background: #ff4d6d !important;
+            transform: scale(1.2);
+        }
+
+        input[type=range]::-moz-range-track {
+            width: 100%; height: 12px; cursor: none;
+            background: transparent; border-radius: 25px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 25px; width: 25px; border: 3px solid white; border-radius: 50%;
+            background: #ffc2d1; cursor: none;
+            box-shadow: 0 4px 10px rgba(255, 194, 209, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .letter {
+            display: none;
+            margin-bottom: 100px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: left;
+            animation: slideUp 1s ease forwards;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 30px; height: 30px;
+            background-image: url("https://i.postimg.cc/Kcrw4CNB/mininini.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none; 
+            z-index: 99999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gradient-bg"></div>
+    <div class="blob-cont">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div id="floating-container"></div>
+    <div class="noise-overlay"></div>
+    <div id="custom-cursor"></div>
+
+    <div class="container">
+        
+        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2M3Zm40ZG14cWw4ZGRkZmJneGI2ZzU5cmlwcnExZWVlczd4MjBwMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NfzERYyiWcXU4/giphy.gif" alt="Cute Bear" class="mascot-img">
+        
+        <h1>Muahehehehehe! Tui biết ngayy! 💗</h1>
+        <p>Hai tháng qua của tụi mình có gì hay bạn gái xem hong nèee</p>
+
+        <div class="gallery-container">
+            <div class="polaroid">
+                <img src="https://i.postimg.cc/zXmS34ZL/295A6171-3AF7-4C10-9A1D-CA3C4F642E2B-1-105-c.jpg" alt="Bun Bo">
+                <div class="note">First date của tụi mình nè 🍜</div>
+            </div>
+            <div class="polaroid">
+                <img src="https://i.postimg.cc/hPymTYNz/72771A6C-E5AC-45B4-845D-174B1004D9BE-1-105-c.jpg" alt="Laikee">
+                <div class="note">Second date đẳng cấp Laikeeeee 🍤</div>
+            </div>
+            <div class="polaroid">
+                <img src="https://i.postimg.cc/gJK0HwSQ/D189AC14-B031-4648-86FA-EAE1D3F9827D-1-201-a.jpg" alt="Red Adidas">
+                <div class="note">Third date đỏ lè lunnn 🍗</div>
+            </div>
+            <div class="polaroid">
+                <img src="https://i.postimg.cc/fWrsnjdT/0534B58C-03D9-484C-BCAB-8896546C38CD-1-105-c.jpg" alt="Pho">
+                <div class="note">Phú bà dắt Bin đi ăn phở đỉnh cao đồ he 🍲</div>
+            </div>
+            <div class="polaroid">
+                <img src="https://i.postimg.cc/kgML22KF/IMG-5573-Edited.jpg" alt="Pretty">
+                <div class="note">Bạch Nguyệt Quang hở sao xinh zayy ✨</div>
+            </div>
+            <div class="polaroid">
+                <img src="https://i.postimg.cc/NMnzVDzm/B793031B-3B12-4AC4-9E18-8CDCB6BB9319-1-105-c.jpg" alt="Hehe">
+                <div class="note">Gòi xong cua được Nini lun òi 🫶</div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2>Nini yêu Bin cỡ nào đóooo?</h2>
+            
+            <input type="range" min="0" max="100" value="50" id="slider">
+            
+            <p id="text" style="font-weight: bold; font-size: 1.5rem; color: #d44d5c; min-height: 40px;">50%</p>
+        </div>
+
+        <div class="glass-card letter" id="letter">
+            <h2 style="text-align: center;">GỬI BẢO NGHI,</h2>
+            <p>
+                Happy Valentinini yêuuuuu,
+                <br><br>
+                Thiệt là cũng sắp 18 nồi bánh chưng rùi tui chưa có đón Valentine luôn á! Tui cũng hỏng tin là có ngày tui sẽ có một nguòi bạn gái dễ thương, đáng iu như bà zayy!
+                <br><br>
+                Thiệt là năm cuối cấp này tui cũng hỏng muốn có bồ đâuuu! Mà tự nhiên có một bạn nữ dễ thương gì đâu, tốt tính, đáng yêu, biết suy nghĩ cho mọi người, hoà đồng, chăm chỉ, ngoan ngoãn, học giỏi! Tui thấy tui may mắn nhất trên đời!
+                <br><br>
+                Cảm ơn bà đã đến bên tui. Tui thấy bà giống như một phép màu hay một cái sự sắp đặt gì đó của định mệnh vậy! Từ ngày có Bảo Nghi trong cuộc sống, tui thấy nó đẹp hơn, hạnh phúc hơn nhiều lắm lắm! Mỗi ngày thức dậy, tui biết rằng ở đâu đó tui có một người bạn gái đang nghĩ đến tui, quan tâm và yêu thương tui, nói thiệt là tui hạnh phúc lắm luôn!
+                <br><br>
+                Tui cũng yêu Bảo Nghi nhiều lắm! Tui nhớ cái nụ cười dễ thương đó quá hic, cái dáng người nhỏ nhắn xinh xắn, nhớ mái tóc dài mượt mà thơm phức, nhớ cả giọng nói ngọt ngào của Bảo Nghi nữaa!
+                <br><br>
+                Nhưng mà bà biết gì hong? Còn có 9 ngày nữa thoi à! Tui mà gặp được bà là ôm cứng ngắt luôn đó, hong bỏ ra đâu! Rất nhớ, rất nhớ em!
+                <br><br>
+                Chúc yêu có một ngày Valentine thiệt vui vẻ, hạnh phúc, và luôn nhớ là Bảo Nghi luôn có một Bảo Đại yêu thương và quan tâm đến bà nhiều lắmmmmm! Tui mong là tui sẽ luôn làm cho Bảo Nghi cười thật tươi nè, luôn vui vẻ, luôn hạnh phúc bên tui nhó!
+                <br><br>
+                <strong>Yêu Bảo Nghi nhìuuuuu 💗</strong>
+                <br><br>
+                <em>Hà Bảo Đại - 14.02.2026</em>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const cursor = document.getElementById('custom-cursor');
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        if (!isTouchDevice) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX - 15 + 'px';
+                cursor.style.top = e.clientY - 15 + 'px';
+            });
+        } else {
+            cursor.style.display = 'none';
+        }
+
+        const slider = document.getElementById('slider');
+        const text = document.getElementById('text');
+        const letter = document.getElementById('letter'); 
+        let isLocked = false;
+        let animationId = null;
+
+        updateSliderFill();
+
+        slider.addEventListener('input', function() {
+            if (isLocked) {
+                this.value = 100;
+                return;
+            }
+            
+            cancelAnimationFrame(animationId);
+            
+            let val = parseInt(this.value);
+            
+            if (val <= 20) {
+                val = 20;
+                this.value = 20; 
+                text.innerText = "Eeeee sao kéo xuống đây z bà! 😠";
+                text.style.color = "#888"; 
+            } else {
+                text.innerText = val + "%";
+                text.style.color = "#d44d5c"; 
+            }
+            
+            updateSliderFill();
+            
+            if (val === 100) {
+                lockSlider();
+            }
+        });
+
+        slider.addEventListener('mouseup', snapBack);
+        slider.addEventListener('touchend', snapBack);
+        slider.addEventListener('mouseleave', snapBack); 
+
+        function updateSliderFill() {
+            let val = slider.value;
+            slider.style.background = `linear-gradient(to right, #ff4d6d 0%, #ff4d6d ${val}%, #fff ${val}%, #fff 100%)`;
+        }
+
+        function lockSlider() {
+            isLocked = true;
+            slider.value = 100;
+            updateSliderFill(); 
+            slider.classList.add('locked'); 
+            slider.disabled = true; 
+            
+            text.innerText = "MUAHEHEHEHEHE 100% LUN HẢ 😘";
+            text.style.color = "#d44d5c";
+            
+            launchConfetti();
+            
+            letter.style.display = "block";
+            setTimeout(() => {
+                letter.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 600);
+        }
+
+        function snapBack() {
+            if (isLocked) return;
+            
+            setTimeout(() => {
+                let currentVal = parseInt(slider.value);
+                if (currentVal >= 100 || isLocked) return;
+
+                function animate() {
+                    let current = parseFloat(slider.value);
+                    let diff = 50 - current;
+                    
+                    if (Math.abs(diff) < 0.5) {
+                        slider.value = 50;
+                        updateSliderFill();
+                        text.innerText = "50%";
+                        text.style.color = "#d44d5c"; 
+                        return;
+                    }
+                    
+                    let nextVal = current + (diff * 0.1); 
+                    slider.value = nextVal;
+                    updateSliderFill(); 
+                    
+                    text.innerText = Math.round(nextVal) + "%";
+                    text.style.color = "#d44d5c";
+                    
+                    animationId = requestAnimationFrame(animate);
+                }
+                
+                if (!isLocked) animate();
+            }, 10);
+        }
+
+        function launchConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        function createFloatingElement() {
+            const el = document.createElement('div');
+            el.innerHTML = Math.random() > 0.5 ? '🌷' : '❤️';
+            el.style.position = 'absolute'; 
+            el.style.left = Math.random() * 95 + 'vw'; 
+            el.style.top = '110vh'; 
+            el.style.fontSize = (Math.random() * 20 + 20) + 'px'; 
+            
+            const duration = Math.random() * 5 + 8; 
+            el.style.animation = `floatUp ${duration}s linear forwards`;
+            
+            document.getElementById('floating-container').appendChild(el);
+            setTimeout(() => { el.remove() }, duration * 1000);
+        }
+        setInterval(createFloatingElement, 600); 
+
+    </script>
+</body>
+</html>
