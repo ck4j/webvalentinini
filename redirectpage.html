@@ -365,7 +365,7 @@
 
         <div class="glass-card letter" id="letter">
             
-            <img src="https://i.postimg.cc/VsV1MQz4/valentinini.png" alt="Secret Photo" class="secret-img">
+            <img src="https://i.postimg.cc/VsV1MQz4/valentinini.png" alt="Secret Photo" class="secret-img" id="secret-photo">
 
             <h2 style="text-align: center;">GỬI BẢO NGHI,</h2>
             <p>
@@ -461,7 +461,7 @@
             
             letter.style.display = "block";
             setTimeout(() => {
-                letter.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('secret-photo').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 600);
         }
 
